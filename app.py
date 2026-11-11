@@ -544,7 +544,6 @@ def deriv_live_tick(symbol: str = "1HZ100V"):
 
         connection.send(json.dumps({
             "ticks": symbol,
-            "subscribe": 0,
             "req_id": 2
         }))
 
