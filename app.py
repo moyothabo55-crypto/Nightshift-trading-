@@ -456,6 +456,26 @@ async function loadDerivMarkets() {
 }
 
 loadDerivMarkets();
+async function updateDerivPrice() {
+  const price = document.getElementById("deriv-price");
+
+  try {
+    const response = await fetch("/api/deriv/tick?symbol=1HZ100V");
+    const data = await response.json();
+
+    if (!data.ok) {
+      throw new Error(data.error || "Price unavailable");
+    }
+
+    price.textContent = data.price;
+  } catch (error) {
+    price.textContent = "Unavailable";
+    console.error(error);
+  }
+}
+
+updateDerivPrice();
+setInterval(updateDerivPrice, 20000);
 </script>
 
 </body>
