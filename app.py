@@ -1,4 +1,13 @@
 
+services:
+  - type: web
+    name: nightshift
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+
 fastapi>=0.115,<1.0
 uvicorn[standard]>=0.30,<1.0
 
