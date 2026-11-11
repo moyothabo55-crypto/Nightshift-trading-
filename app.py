@@ -418,3 +418,62 @@ setInterval(refresh,30000);
 def dashboard():
     return DASHBOARD
 
+# ---------------------------------------------------------
+# DERIV MARKET SCANNER — PUBLIC DATA ONLY
+# No account token and no real-money trading.
+# ---------------------------------------------------------
+
+def get_deriv_markets():
+    import websocket
+
+    url = "wss://api.derivws.com/trading/v1/options/ws/public"
+
+    connection = websocket.create_connection(url, timeout=15)
+
+    try:
+        connection.send(json.dumps({
+            "active_symbols": "brief",
+            "req_id": 1
+        }))
+
+        while True:
+            response = json.loads(connection.recv())
+
+            if response.get("msg_type") == "active_symbols":
+                symbols = response.get("active_symbols", [])
+
+                return [
+                    {
+                        "symbol": item.get("underlying_symbol"),
+                        "name": item.get("underlying_symbol_name"),
+                        "market": item.get("market"),
+                        "submarket": item.get("submarket"),
+                        "type": item.get("underlying_symbol_type"),
+                    }
+                    for item in symbols
+                ]
+
+            if response.get("error"):
+                raise RuntimeError(response["error"].get("message", "Deriv API error"))
+
+    finally:
+        connection.close()
+
+
+@app.get("/api/deriv/markets")
+def deriv_markets_endpoint():
+    try:
+        markets = get_deriv_markets()
+        return {
+            "ok": True,
+            "source": "Deriv public API",
+            "count": len(markets),
+            "markets": markets,
+        }
+    except Exception as error:
+        return {
+            "ok": False,
+            "error": str(error),
+            "markets": [],
+        }
+
