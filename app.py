@@ -464,7 +464,7 @@ loadDerivMarkets();
 
 @app.get("/", response_class=HTMLResponse)
 def dashboard():
-    return DASHBOARD
+    return HTMLResponse(content=DASHBOARD)
 
 # ---------------------------------------------------------
 # DERIV MARKET SCANNER — PUBLIC DATA ONLY
