@@ -524,4 +524,54 @@ def deriv_markets_endpoint():
             "error": str(error),
             "markets": [],
         }
+        
+@app.get("/api/deriv/tick")
+def deriv_live_tick(symbol: str = "1HZ100V"):
+    import websocket
+
+    allowed_symbols = {"1HZ100V", "R_75", "BOOM1000"}
+
+    if symbol not in allowed_symbols:
+        return {"ok": False, "error": "Unsupported symbol"}
+
+    connection = None
+
+    try:
+        connection = websocket.create_connection(
+            "wss://api.derivws.com/trading/v1/options/ws/public",
+            timeout=15
+        )
+
+        connection.send(json.dumps({
+            "ticks": symbol,
+            "subscribe": 0,
+            "req_id": 2
+        }))
+
+        while True:
+            response = json.loads(connection.recv())
+
+            if response.get("error"):
+                return {
+                    "ok": False,
+                    "error": response["error"].get("message")
+                }
+
+            if response.get("msg_type") == "tick":
+                tick = response["tick"]
+                return {
+                    "ok": True,
+                    "symbol": symbol,
+                    "price": tick.get("quote"),
+                    "epoch": tick.get("epoch"),
+                    "source": "Deriv"
+                }
+
+    except Exception as error:
+        return {"ok": False, "error": str(error)}
+
+    finally:
+        if connection:
+            connection.close()
+
 
