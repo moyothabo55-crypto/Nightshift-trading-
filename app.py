@@ -414,6 +414,7 @@ setInterval(refresh,30000);
   <h2>NIGHTSHIFT — DERIV MARKETS</h2>
   <p id="deriv-status">Connecting to Deriv...</p>
   <p>Available instruments: <strong id="deriv-count">--</strong></p>
+<p>Volatility 100 (1s) live price: <strong id="deriv-price">Waiting...</strong></p>
   <pre id="deriv-data" style="white-space:pre-wrap;overflow-wrap:anywhere;color:#9ca3af;">Loading market data...</pre>
   <button onclick="loadDerivMarkets()" style="padding:10px 16px;border-radius:8px;cursor:pointer;">Refresh Markets</button>
 </section>
