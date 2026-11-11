@@ -409,6 +409,54 @@ async function refresh(){
 refresh();
 setInterval(refresh,30000);
 </script>
+
+<section id="deriv-panel" style="background:#111827;color:#fff;padding:18px;margin:20px;border:1px solid #374151;border-radius:12px;">
+  <h2>NIGHTSHIFT — DERIV MARKETS</h2>
+  <p id="deriv-status">Connecting to Deriv...</p>
+  <p>Available instruments: <strong id="deriv-count">--</strong></p>
+  <pre id="deriv-data" style="white-space:pre-wrap;overflow-wrap:anywhere;color:#9ca3af;">Loading market data...</pre>
+  <button onclick="loadDerivMarkets()" style="padding:10px 16px;border-radius:8px;cursor:pointer;">Refresh Markets</button>
+</section>
+
+<script>
+async function loadDerivMarkets() {
+  const status = document.getElementById("deriv-status");
+  const count = document.getElementById("deriv-count");
+  const output = document.getElementById("deriv-data");
+
+  status.textContent = "Connecting...";
+
+  try {
+    const response = await fetch("/api/deriv/markets");
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    const data = await response.json();
+
+    status.textContent = data.ok
+      ? "Deriv feed connected"
+      : "Feed reported an error";
+
+    count.textContent = data.count ?? "--";
+
+    output.textContent = JSON.stringify(
+      data.markets ?? data,
+      null,
+      2
+    );
+
+  } catch (error) {
+    status.textContent = "Connection failed: " + error.message;
+    count.textContent = "--";
+    output.textContent = "Unable to load market data.";
+  }
+}
+
+loadDerivMarkets();
+</script>
+
 </body>
 </html>
 """
