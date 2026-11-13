@@ -658,12 +658,14 @@ async function refresh(){
     if(data.ok && data.price!=null){
       connection.textContent="● MARKET CONNECTED";
       connection.style.color="#35e59a";
-      put("btc-status","● Kraken feed connected");
-      put("price",money(data.price));
-      put("chart-price",money(data.price));
-      prices.push(Number(data.price));
-      if(prices.length>60)prices.shift();
-      drawChart();
+      if(!livePriceConnected){
+  put("btc-status","● Kraken REST fallback");
+  put("price",money(data.price));
+  put("chart-price",money(data.price));
+  prices.push(Number(data.price));
+  if(prices.length>120)prices.shift();
+  drawChart();
+}
     }else{
       connection.textContent="● MARKET UNAVAILABLE";
       connection.style.color="#ff647c";
