@@ -205,7 +205,8 @@ def calculate_adx(candles, period=14):
     if denominator == 0:
         return 0.0
 
-    return 100 * abs(plus_di - minus_di) / denominator
+    return 100 * abs(plus_di - minus_di) / denominator   
+
 def record_trade(action, price, quantity, pnl=None):
     entry = {
         "time": datetime.now(timezone.utc).isoformat(),
