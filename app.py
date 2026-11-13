@@ -876,6 +876,12 @@ async function refresh(){
 
     put("ema9",fmt(data.ema9));
     put("ema21",fmt(data.ema21));
+    put("regime",data.regime||"WAITING");
+    put("confidence",data.confidence==null?"--":data.confidence+"%");
+    put("rsi",fmt(data.rsi));
+    put("adx",fmt(data.adx));
+    put("atr",fmt(data.atr));
+    put("signal-reason",data.signal_reason||"Waiting for analysis");
     put("cash",money(data.cash_balance));
     put("equity",money(data.equity));
     pnl("total",data.total_pnl);
