@@ -379,6 +379,13 @@ def build_status(market=None, market_error=None):
             "signal": market["signal"] if market else "WAITING",
             "ema9": market["ema9"] if market else None,
             "ema21": market["ema21"] if market else None,
+            "regime": market["regime"] if market else None,
+            "confidence": market["confidence"] if market else None,
+            "rsi": market["rsi"] if market else None,
+            "adx": market["adx"] if market else None,
+            "atr": market["atr"] if market else None,
+            "signal_reason": market["reason"] if market else None,
+            
             "cash_balance": round(cash, 2),
             "equity": round(equity, 2),
             "starting_balance": STARTING_BALANCE,
