@@ -114,7 +114,7 @@ def get_market_data():
         "source": "Kraken public market data",
     }
 
-
+def calculate_ema(values, period):
     if len(values) < period:
         raise ValueError("Not enough prices to calculate EMA")
 
