@@ -120,7 +120,92 @@ def calculate_ema(values, period):
 
     return ema
 
+def calculate_rsi(closes, period=14):
+    if len(closes) < period + 1:
+        return 50.0
 
+    changes = [
+        closes[i] - closes[i - 1]
+        for i in range(1, len(closes))
+    ]
+
+    gains = [max(change, 0) for change in changes[-period:]]
+    losses = [max(-change, 0) for change in changes[-period:]]
+
+    average_gain = sum(gains) / period
+    average_loss = sum(losses) / period
+
+    if average_loss == 0:
+        return 100.0
+
+    relative_strength = average_gain / average_loss
+    return 100 - (100 / (1 + relative_strength))
+
+
+def calculate_atr(candles, period=14):
+    if len(candles) < period + 1:
+        return 0.0
+
+    ranges = []
+
+    for i in range(1, len(candles)):
+        high = float(candles[i][2])
+        low = float(candles[i][3])
+        previous_close = float(candles[i - 1][4])
+
+        true_range = max(
+            high - low,
+            abs(high - previous_close),
+            abs(low - previous_close)
+        )
+        ranges.append(true_range)
+
+    return sum(ranges[-period:]) / period
+
+
+def calculate_adx(candles, period=14):
+    if len(candles) < period * 2:
+        return 0.0
+
+    plus_dm = []
+    minus_dm = []
+    true_ranges = []
+
+    for i in range(1, len(candles)):
+        high = float(candles[i][2])
+        low = float(candles[i][3])
+        previous_high = float(candles[i - 1][2])
+        previous_low = float(candles[i - 1][3])
+        previous_close = float(candles[i - 1][4])
+
+        up_move = high - previous_high
+        down_move = previous_low - low
+
+        plus_dm.append(
+            up_move if up_move > down_move and up_move > 0 else 0
+        )
+        minus_dm.append(
+            down_move if down_move > up_move and down_move > 0 else 0
+        )
+
+        true_ranges.append(max(
+            high - low,
+            abs(high - previous_close),
+            abs(low - previous_close)
+        ))
+
+    tr = sum(true_ranges[-period:])
+    if tr == 0:
+        return 0.0
+
+    plus_di = 100 * sum(plus_dm[-period:]) / tr
+    minus_di = 100 * sum(minus_dm[-period:]) / tr
+
+    denominator = plus_di + minus_di
+    if denominator == 0:
+        return 0.0
+
+    return 100 * abs(plus_di - minus_di) / denominator
 def record_trade(action, price, quantity, pnl=None):
     entry = {
         "time": datetime.now(timezone.utc).isoformat(),
