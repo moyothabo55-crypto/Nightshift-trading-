@@ -311,7 +311,7 @@ def process_paper_strategy(market):
 
         state["last_processed_candle"] = candle_time
         position = state["position"]
-                equity = state["cash"]
+        equity = state["cash"]
         if position:
             equity += position["quantity"] * price
 
