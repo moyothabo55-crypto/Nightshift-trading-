@@ -657,6 +657,38 @@ th{font-size:10px;color:var(--muted);letter-spacing:1px}
 </div>
 
 <div class="section-title">
+  <h2>Adaptive Intelligence</h2>
+  <span class="muted">Multi-indicator analysis</span>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-label">Market regime</div>
+    <div class="big" id="regime">WAITING</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Signal confidence</div>
+    <div class="big" id="confidence">--</div>
+  </div>
+  <div class="card">
+    <div class="card-label">RSI · 14</div>
+    <div class="big" id="rsi">--</div>
+  </div>
+  <div class="card">
+    <div class="card-label">ADX · 14</div>
+    <div class="big" id="adx">--</div>
+  </div>
+  <div class="card">
+    <div class="card-label">ATR · 14</div>
+    <div class="big" id="atr">--</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Strategy explanation</div>
+    <div class="small" id="signal-reason">Waiting for analysis</div>
+  </div>
+</div>
+
+<div class="section-title">
   <h2>Portfolio Performance</h2>
   <span class="muted">Simulated account</span>
 </div>
