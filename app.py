@@ -562,6 +562,7 @@ let liveSocket=null;
 
 function connectLivePrice(){
   liveSocket=new WebSocket("wss://ws.kraken.com/");
+
   liveSocket.onopen=()=>{
     liveSocket.send(JSON.stringify({
       event:"subscribe",
@@ -569,29 +570,49 @@ function connectLivePrice(){
       subscription:{name:"ticker"}
     }));
   };
+
   liveSocket.onmessage=(event)=>{
     const message=JSON.parse(event.data);
+
     if(!Array.isArray(message)||!message.includes("ticker"))return;
+
     const price=Number(message[1]?.c?.[0]);
     if(!Number.isFinite(price))return;
+
     livePriceConnected=true;
     put("connection","● LIVE PRICE STREAM");
-    document.getElementById("connection").style.color="#35e59a";
-    if(!livePriceConnected){
-  put("btc-status","● Kraken REST fallback");
-  put("price",money(data.price));
-  put("chart-price",money(data.price));
-  prices.push(Number(data.price));
-  if(prices.length>120)prices.shift();
-  drawChart();
+    put("btc-status","● Kraken live stream");
+    put("price",money(price));
+    put("chart-price",money(price));
+
+    prices.push(price);
+    if(prices.length>120)prices.shift();
+
+    drawChart();
+  };
+
+  liveSocket.onclose=()=>{
+    livePriceConnected=false;
+    put("connection","● RECONNECTING");
+    setTimeout(connectLivePrice,3000);
+  };
+
+  liveSocket.onerror=()=>{
+    liveSocket.close();
+  };
 }
+
+function drawChart(){
   const canvas=document.getElementById("price-chart");
   const rect=canvas.getBoundingClientRect();
   const ratio=window.devicePixelRatio||1;
+
   canvas.width=rect.width*ratio;
   canvas.height=rect.height*ratio;
+
   const ctx=canvas.getContext("2d");
   ctx.scale(ratio,ratio);
+
   const w=rect.width,h=rect.height;
 
   ctx.clearRect(0,0,w,h);
@@ -600,7 +621,10 @@ function connectLivePrice(){
 
   for(let i=1;i<4;i++){
     const y=h*i/4;
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(w,y);
+    ctx.stroke();
   }
 
   if(prices.length<2)return;
@@ -610,12 +634,15 @@ function connectLivePrice(){
   const range=max-min||1;
 
   ctx.beginPath();
+
   prices.forEach((p,i)=>{
     const x=i*w/(prices.length-1);
     const y=h-((p-min)/range)*(h-24)-12;
+
     if(i===0)ctx.moveTo(x,y);
     else ctx.lineTo(x,y);
   });
+
   ctx.strokeStyle="#35e59a";
   ctx.lineWidth=2.5;
   ctx.stroke();
