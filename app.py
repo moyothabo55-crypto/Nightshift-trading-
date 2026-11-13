@@ -206,7 +206,73 @@ def calculate_adx(candles, period=14):
         return 0.0
 
     return 100 * abs(plus_di - minus_di) / denominator   
+def adaptive_strategy(market):
+    price = market["price"]
+    closes = market["closes"]
+    candles = market["raw_candles"]
 
+    ema9 = market["ema9"]
+    ema21 = market["ema21"]
+    ema50 = calculate_ema(closes[-80:], 50)
+    ema200 = calculate_ema(closes[-200:], 200)
+
+    rsi = calculate_rsi(closes)
+    atr = calculate_atr(candles)
+    adx = calculate_adx(candles)
+
+    atr_percent = (atr / price) * 100 if price else 0
+
+    trend_up = ema9 > ema21 and ema21 > ema50 and ema50 > ema200
+    trend_down = ema9 < ema21 and ema21 < ema50 and ema50 < ema200
+
+    if atr_percent > 2.0:
+        return {
+            "signal": "HOLD",
+            "regime": "HIGH VOLATILITY",
+            "confidence": 0,
+            "reason": "Volatility filter",
+            "rsi": round(rsi, 2),
+            "adx": round(adx, 2),
+            "atr": round(atr, 2),
+        }
+
+    if adx >= 25:
+        if trend_up and 45 <= rsi <= 68:
+            signal = "BUY"
+            regime = "TRENDING UP"
+            confidence = 85
+        elif trend_down and rsi < 55:
+            signal = "SELL"
+            regime = "TRENDING DOWN"
+            confidence = 85
+        else:
+            signal = "HOLD"
+            regime = "TRENDING"
+            confidence = 30
+
+    else:
+        if rsi <= 30:
+            signal = "BUY"
+            regime = "RANGING"
+            confidence = 70
+        elif rsi >= 70:
+            signal = "SELL"
+            regime = "RANGING"
+            confidence = 70
+        else:
+            signal = "HOLD"
+            regime = "RANGING"
+            confidence = 25
+
+    return {
+        "signal": signal,
+        "regime": regime,
+        "confidence": confidence,
+        "reason": "Adaptive indicator analysis",
+        "rsi": round(rsi, 2),
+        "adx": round(adx, 2),
+        "atr": round(atr, 2),
+    }
 def record_trade(action, price, quantity, pnl=None):
     entry = {
         "time": datetime.now(timezone.utc).isoformat(),
