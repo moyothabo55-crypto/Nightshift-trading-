@@ -311,6 +311,35 @@ def process_paper_strategy(market):
 
         state["last_processed_candle"] = candle_time
         position = state["position"]
+                equity = state["cash"]
+        if position:
+            equity += position["quantity"] * price
+
+        today = datetime.now(timezone.utc).date().isoformat()
+
+        if state["day_key"] != today:
+            state["day_key"] = today
+            state["day_start_equity"] = equity
+            state["risk_halted"] = False
+
+        state["peak_equity"] = max(state["peak_equity"], equity)
+
+        daily_loss = (
+            (equity - state["day_start_equity"])
+            / state["day_start_equity"]
+        )
+        drawdown = (
+            (equity - state["peak_equity"])
+            / state["peak_equity"]
+        )
+
+        if daily_loss <= -DAILY_LOSS_LIMIT:
+            state["risk_halted"] = True
+            state["last_action"] = "RISK HALT: Daily loss limit"
+
+        if drawdown <= -MAX_DRAWDOWN:
+            state["risk_halted"] = True
+            state["last_action"] = "RISK HALT: Maximum drawdown"
 
         if position:
             entry_price = position["entry_price"]
