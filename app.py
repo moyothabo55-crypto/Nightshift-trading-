@@ -76,11 +76,11 @@ def get_market_data():
     candles = raw_candles[:-1]
 
     
-if len(candles) < 200:
+    if len(candles) < 200:
     raise RuntimeError("Waiting for at least 200 completed candles")
 
-closes = [float(candle[4]) for candle in candles]
-candle_time = int(candles[-1][0])
+    closes = [float(candle[4]) for candle in candles]
+    candle_time = int(candles[-1][0])
 
 ema9 = calculate_ema(closes[-80:], 9)
 ema21 = calculate_ema(closes[-80:], 21)
@@ -88,7 +88,7 @@ ema21 = calculate_ema(closes[-80:], 21)
 previous_ema9 = calculate_ema(closes[-81:-1], 9)
 previous_ema21 = calculate_ema(closes[-81:-1], 21)
 
-adaptive = adaptive_strategy({
+    adaptive = adaptive_strategy({
     "price": price,
     "ema9": ema9,
     "ema21": ema21,
@@ -96,7 +96,7 @@ adaptive = adaptive_strategy({
     "raw_candles": candles,
 })
 
-return {
+    return {
     "symbol": "BTC/USDT",
     "price": price,
     "ema9": ema9,
