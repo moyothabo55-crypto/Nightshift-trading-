@@ -743,7 +743,27 @@ th{font-size:10px;color:var(--muted);letter-spacing:1px}
     <div class="small" id="signal-reason">Waiting for analysis</div>
   </div>
 </div>
+<div class="section-title">
+  <h2>Risk Monitor</h2>
+  <span class="muted">Capital protection</span>
+</div>
 
+<div class="grid">
+  <div class="card">
+    <div class="card-label">Trading status</div>
+    <div class="big" id="risk-status">ACTIVE</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Daily loss</div>
+    <div class="big" id="daily-loss">0.00%</div>
+    <div class="small">Limit: 2%</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Maximum drawdown</div>
+    <div class="big" id="drawdown">0.00%</div>
+    <div class="small">Limit: 8%</div>
+  </div>
+</div>
 <div class="section-title">
   <h2>Portfolio Performance</h2>
   <span class="muted">Simulated account</span>
