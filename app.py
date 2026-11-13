@@ -271,223 +271,428 @@ def status_endpoint():
         return build_status(market_error=str(error))
 
 
+
 DASHBOARD = r"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NIGHTSHIFT Trading</title>
+<title>NIGHTSHIFT | Trading Terminal</title>
 <style>
+:root {
+  --bg:#080c14; --panel:#101827; --panel2:#151f30;
+  --border:#26344a; --muted:#8999b1; --white:#edf3ff;
+  --green:#35e59a; --red:#ff647c; --gold:#f4c66a;
+}
 *{box-sizing:border-box}
-body{margin:0;background:#090d16;color:#edf2ff;font-family:Arial,sans-serif}
-main{max-width:1050px;margin:auto;padding:22px}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-h1{letter-spacing:4px;margin:8px 0}
-.muted{color:#91a0b9;font-size:13px}
-.pill{border:1px solid #355b50;color:#7de0b0;padding:8px 12px;border-radius:20px;font-size:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px;margin-top:22px}
-.card{background:#111a2a;border:1px solid #243149;border-radius:14px;padding:18px;min-width:0}
-.label{color:#91a0b9;font-size:12px;text-transform:uppercase;letter-spacing:1px}
-.value{font-size:25px;font-weight:bold;margin-top:12px;overflow-wrap:anywhere}
-.green{color:#66dfa5}.red{color:#ff7c87}.yellow{color:#f5ca70}
-section{margin-top:18px}
-h2{font-size:16px;margin:0 0 14px}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--white);
+  font-family:Inter,Arial,sans-serif;
+}
+button{font:inherit}
+.layout{max-width:1450px;margin:auto;padding:22px}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:18px;padding:12px 0 24px;
+  border-bottom:1px solid var(--border)
+}
+.brand{font-size:25px;font-weight:900;letter-spacing:5px}
+.brand span{color:var(--green)}
+.subtitle{color:var(--muted);font-size:11px;letter-spacing:2px;margin-top:6px}
+.nav{display:flex;gap:20px;flex-wrap:wrap}
+.nav a{color:var(--muted);text-decoration:none;font-size:13px}
+.nav a:hover{color:var(--green)}
+.status-pill{
+  border:1px solid #246449;color:var(--green);
+  border-radius:30px;padding:9px 13px;font-size:11px;
+}
+.hero{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:15px;flex-wrap:wrap;padding:30px 0 20px
+}
+.hero h1{font-size:30px;margin:0 0 8px}
+.muted{color:var(--muted);font-size:13px}
+.grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;margin:16px 0
+}
+.card{
+  background:linear-gradient(145deg,var(--panel),#0d1421);
+  border:1px solid var(--border);border-radius:15px;padding:19px;
+  min-width:0;
+}
+.card-label{
+  color:var(--muted);font-size:11px;
+  letter-spacing:1.4px;text-transform:uppercase
+}
+.big{font-size:27px;font-weight:750;margin-top:13px;overflow-wrap:anywhere}
+.small{font-size:12px;color:var(--muted);margin-top:9px}
+.green{color:var(--green)} .red{color:var(--red)}
+.gold{color:var(--gold)}
+.section-title{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin:28px 0 13px
+}
+.section-title h2{font-size:16px;margin:0}
+.market-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px
+}
+.market-price{font-size:25px;font-weight:750;margin:12px 0}
+.chart-card{margin-top:16px}
+.chart-wrap{height:260px;width:100%;position:relative}
+canvas{width:100%;height:100%;display:block}
+.chart-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.signal-box{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;flex-wrap:wrap
+}
+.signal-value{font-size:27px;font-weight:900;letter-spacing:2px}
+.signal-note{font-size:12px;color:var(--muted);margin-top:7px}
+.badge{
+  padding:8px 12px;border-radius:8px;
+  background:#1b2939;font-size:11px;color:var(--gold)
+}
 table{width:100%;border-collapse:collapse;font-size:13px}
-td,th{text-align:left;padding:11px 7px;border-bottom:1px solid #263249}
-th{color:#91a0b9;font-weight:normal}
-.notice{margin-top:18px;padding:14px;border-radius:10px;background:#241f13;color:#e7c77b;font-size:13px;line-height:1.5}
-.error{color:#ff9aa2}
-@media(max-width:500px){main{padding:15px}.value{font-size:22px}}
+th,td{text-align:left;padding:13px 8px;border-bottom:1px solid var(--border)}
+th{font-size:10px;color:var(--muted);letter-spacing:1px}
+.table-wrap{overflow-x:auto}
+.footer{
+  padding:25px 0;color:var(--muted);font-size:11px;
+  line-height:1.7;text-align:center
+}
+@media(max-width:850px){
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .market-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:520px){
+ .layout{padding:14px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .market-grid{grid-template-columns:1fr}
+ .card{padding:14px}
+ .big{font-size:21px}
+ .hero h1{font-size:25px}
+ .nav{gap:13px}
+}
 </style>
 </head>
 <body>
-<main>
-<header>
+<div class="layout">
+
+<header class="topbar">
   <div>
-    <h1>NIGHTSHIFT</h1>
-    <div class="muted">BTC/USDT MARKET SYSTEM</div>
+    <div class="brand">NIGHT<span>SHIFT</span></div>
+    <div class="subtitle">INTELLIGENT MARKET TERMINAL</div>
   </div>
-  <div>
-  <div class="pill">PAPER MODE · NO REAL ORDERS</div>
-  <div class="muted" id="connection" style="margin-top:8px;">Connecting to market...</div>
-</div>
+  <nav class="nav">
+    <a href="#overview">Overview</a>
+    <a href="#markets">Markets</a>
+    <a href="#signals">Signals</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#activity">Activity</a>
+  </nav>
+  <div class="status-pill" id="connection">● CONNECTING</div>
 </header>
 
+<section class="hero" id="overview">
+  <div>
+    <h1>Market Overview</h1>
+    <div class="muted">Your markets. Your strategy. One terminal.</div>
+  </div>
+  <div class="badge">PAPER TRADING · NO REAL ORDERS</div>
+</section>
+
+<div class="grid" id="portfolio">
+  <div class="card">
+    <div class="card-label">Account equity</div>
+    <div class="big" id="equity">$10,000.00</div>
+    <div class="small">Total simulated account value</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Available cash</div>
+    <div class="big" id="cash">$10,000.00</div>
+    <div class="small">Uninvested demo balance</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Total profit / loss</div>
+    <div class="big" id="total">$0.00</div>
+    <div class="small">Since starting balance</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Open position</div>
+    <div class="big" id="position-state">NONE</div>
+    <div class="small" id="position-detail">No active paper position</div>
+  </div>
+</div>
+
+<div class="section-title" id="markets">
+  <h2>Live Markets</h2>
+  <span class="muted">Market data feeds</span>
+</div>
+
+<div class="market-grid">
+  <div class="card">
+    <div class="card-label">Bitcoin · BTC/USDT</div>
+    <div class="market-price" id="price">Loading...</div>
+    <div class="small green" id="btc-status">Waiting for Kraken</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Deriv · Volatility 100 (1s)</div>
+    <div class="market-price" id="deriv-price">Loading...</div>
+    <div class="small" id="deriv-status">Connecting to Deriv</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Gold · XAU/USD</div>
+    <div class="market-price gold">COMING SOON</div>
+    <div class="small">Gold feed not connected yet</div>
+  </div>
+</div>
+
+<div class="card chart-card">
+  <div class="chart-meta">
+    <div>
+      <div class="card-label">Bitcoin price movement</div>
+      <div class="big" id="chart-price">Waiting for data</div>
+    </div>
+    <div class="badge">LIVE PRICE HISTORY</div>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="price-chart"></canvas>
+  </div>
+  <div class="small">Chart builds from incoming price updates during this session.</div>
+</div>
+
+<div class="section-title" id="signals">
+  <h2>Trading Intelligence</h2>
+  <span class="muted">EMA 9 / EMA 21 · 5-minute timeframe</span>
+</div>
+
 <div class="grid">
-  <div class="card"><div class="label">BTC/USDT price</div><div class="value" id="price">Loading...</div></div>
-  <div class="card"><div class="label">Market signal</div><div class="value yellow" id="signal">WAITING</div></div>
-  <div class="card"><div class="label">Cash balance</div><div class="value" id="cash">$10,000.00</div></div>
-  <div class="card"><div class="label">Account equity</div><div class="value" id="equity">$10,000.00</div></div>
-  <div class="card"><div class="label">Realized P&L</div><div class="value" id="realized">$0.00</div></div>
-  <div class="card"><div class="label">Unrealized P&L</div><div class="value" id="unrealized">$0.00</div></div>
+  <div class="card">
+    <div class="card-label">Current market signal</div>
+    <div class="signal-value gold" id="signal">WAITING</div>
+    <div class="signal-note">Based on EMA crossover direction</div>
+  </div>
+  <div class="card">
+    <div class="card-label">EMA 9</div>
+    <div class="big" id="ema9">--</div>
+    <div class="small">Short-term average</div>
+  </div>
+  <div class="card">
+    <div class="card-label">EMA 21</div>
+    <div class="big" id="ema21">--</div>
+    <div class="small">Longer-term average</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Realized profit / loss</div>
+    <div class="big" id="realized">$0.00</div>
+    <div class="small">Closed paper trades</div>
+  </div>
 </div>
 
-<section class="card">
-  <h2>Market indicators</h2>
-  <div class="grid" style="margin-top:0">
-    <div><div class="label">EMA 9</div><div class="value" id="ema9">--</div></div>
-    <div><div class="label">EMA 21</div><div class="value" id="ema21">--</div></div>
-    <div><div class="label">Total P&L</div><div class="value" id="total">$0.00</div></div>
+<div class="section-title">
+  <h2>Portfolio Performance</h2>
+  <span class="muted">Simulated account</span>
+</div>
+<div class="grid">
+  <div class="card">
+    <div class="card-label">Unrealized P&L</div>
+    <div class="big" id="unrealized">$0.00</div>
   </div>
-</section>
+  <div class="card">
+    <div class="card-label">Starting balance</div>
+    <div class="big">$10,000.00</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Last strategy action</div>
+    <div class="big" id="last-action" style="font-size:17px">Waiting</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Data source</div>
+    <div class="big" style="font-size:17px">KRAKEN</div>
+    <div class="small">Public market data</div>
+  </div>
+</div>
 
-<section class="card">
-  <h2>Open paper position</h2>
-  <div id="position" class="muted">No open position</div>
-</section>
-
-<section class="card">
-  <h2>Recent activity</h2>
-  <div style="overflow-x:auto">
+<div class="section-title" id="activity">
+  <h2>Recent Paper Trades</h2>
+  <span class="muted">Latest activity</span>
+</div>
+<div class="card table-wrap">
   <table>
-    <thead><tr><th>Action</th><th>Price</th><th>Quantity</th><th>P&L</th></tr></thead>
-    <tbody id="trades"><tr><td colspan="4">No trades yet</td></tr></tbody>
+    <thead>
+      <tr><th>ACTION</th><th>PRICE</th><th>QUANTITY</th><th>PROFIT / LOSS</th></tr>
+    </thead>
+    <tbody id="trades">
+      <tr><td colspan="4" class="muted">No trades yet</td></tr>
+    </tbody>
   </table>
-  </div>
-</section>
-
-<div class="notice">
-  Educational paper-trading test only. Trades are simulated, not sent to an exchange.
-  EMA signals are not a guarantee of profit. This strategy has not been proven profitable.
-  Market data is supplied by Kraken's public API.
 </div>
-<div class="muted" style="margin-top:15px" id="updated">Connecting to market...</div>
-<div class="muted error" style="margin-top:8px" id="error"></div>
-</main>
+
+<div class="footer">
+  NIGHTSHIFT TRADING TERMINAL · EDUCATIONAL PAPER TRADING ONLY<br>
+  Simulated trades are not sent to an exchange. Signals do not guarantee profits.
+  Market data availability depends on external providers.
+</div>
+</div>
 
 <script>
 const money = n => n == null ? "--" :
-  new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(n);
-const number = n => n == null ? "--" :
+  new Intl.NumberFormat("en-US",{
+    style:"currency",currency:"USD"
+  }).format(Number(n));
+
+const fmt = n => n == null ? "--" :
   Number(n).toLocaleString("en-US",{maximumFractionDigits:2});
 
-function setValue(id, value, pnl=false){
+function put(id,value){
+  document.getElementById(id).textContent=value;
+}
+
+function pnl(id,value){
   const el=document.getElementById(id);
-  el.textContent=value;
-  if(pnl){
-    el.className="value "+(Number(value.replace(/[^0-9.-]/g,""))>=0?"green":"red");
+  el.textContent=money(value);
+  el.className="big "+(Number(value)>=0?"green":"red");
+}
+
+let prices=[];
+
+function drawChart(){
+  const canvas=document.getElementById("price-chart");
+  const rect=canvas.getBoundingClientRect();
+  const ratio=window.devicePixelRatio||1;
+  canvas.width=rect.width*ratio;
+  canvas.height=rect.height*ratio;
+  const ctx=canvas.getContext("2d");
+  ctx.scale(ratio,ratio);
+  const w=rect.width,h=rect.height;
+
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle="#26344a";
+  ctx.lineWidth=1;
+
+  for(let i=1;i<4;i++){
+    const y=h*i/4;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
   }
+
+  if(prices.length<2)return;
+
+  const min=Math.min(...prices);
+  const max=Math.max(...prices);
+  const range=max-min||1;
+
+  ctx.beginPath();
+  prices.forEach((p,i)=>{
+    const x=i*w/(prices.length-1);
+    const y=h-((p-min)/range)*(h-24)-12;
+    if(i===0)ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle="#35e59a";
+  ctx.lineWidth=2.5;
+  ctx.stroke();
 }
 
 async function refresh(){
   try{
     const response=await fetch("/api/status",{cache:"no-store"});
+    if(!response.ok)throw new Error("HTTP "+response.status);
     const data=await response.json();
-const connection = document.getElementById("connection");
-connection.textContent = data.market_error
-  ? "Market feed unavailable"
-  : "● LIVE · Market connected";
-connection.style.color = data.market_error ? "#ff7c87" : "#66dfa5";
-    if(data.price != null) setValue("price",money(data.price));
-    document.getElementById("signal").textContent=data.signal || "WAITING";
-    document.getElementById("signal").className="value "+
-      (data.signal==="BUY"?"green":data.signal==="SELL"?"red":"yellow");
 
-    setValue("cash",money(data.cash_balance));
-    setValue("equity",money(data.equity));
-    setValue("realized",money(data.realized_pnl),true);
-    setValue("unrealized",money(data.unrealized_pnl),true);
-    setValue("total",money(data.total_pnl),true);
-    document.getElementById("ema9").textContent=number(data.ema9);
-    document.getElementById("ema21").textContent=number(data.ema21);
+    const connection=document.getElementById("connection");
+    if(data.ok && data.price!=null){
+      connection.textContent="● MARKET CONNECTED";
+      connection.style.color="#35e59a";
+      put("btc-status","● Kraken feed connected");
+      put("price",money(data.price));
+      put("chart-price",money(data.price));
+      prices.push(Number(data.price));
+      if(prices.length>60)prices.shift();
+      drawChart();
+    }else{
+      connection.textContent="● MARKET UNAVAILABLE";
+      connection.style.color="#ff647c";
+      put("btc-status","Waiting for market data");
+    }
 
-    const p=data.position;
-    document.getElementById("position").innerHTML=p
-      ? "Quantity: <b>"+p.quantity+"</b><br>Entry price: <b>"+money(p.entry_price)+
-        "</b><br>Market value: <b>"+money(p.market_value)+"</b>"
-      : "No open position";
+    put("signal",data.signal||"WAITING");
+    const signal=document.getElementById("signal");
+    signal.className="signal-value "+
+      (data.signal==="BUY"?"green":data.signal==="SELL"?"red":"gold");
 
-    const rows=data.trades || [];
-    document.getElementById("trades").innerHTML=rows.length
-      ? rows.map(t=>"<tr><td>"+t.action+"</td><td>"+money(t.price)+
-        "</td><td>"+t.quantity+"</td><td>"+
-        (t.pnl==null?"--":money(t.pnl))+"</td></tr>").join("")
-      : '<tr><td colspan="4">No trades yet</td></tr>';
+    put("ema9",fmt(data.ema9));
+    put("ema21",fmt(data.ema21));
+    put("cash",money(data.cash_balance));
+    put("equity",money(data.equity));
+    pnl("total",data.total_pnl);
+    pnl("realized",data.realized_pnl);
+    pnl("unrealized",data.unrealized_pnl);
+    put("last-action",data.last_action||"Waiting");
 
-    document.getElementById("updated").textContent=
-      "Last update: "+(data.last_update || "Waiting")+" · Refreshes every 30 seconds";
-    document.getElementById("error").textContent=
-      data.market_error ? "Market data error: "+data.market_error : "";
+    if(data.position){
+      put("position-state","OPEN");
+      put("position-detail",
+        "Entry: "+money(data.position.entry_price)+
+        " · Value: "+money(data.position.market_value));
+    }else{
+      put("position-state","NONE");
+      put("position-detail","No active paper position");
+    }
+
+    const tbody=document.getElementById("trades");
+    tbody.replaceChildren();
+    (data.trades||[]).forEach(t=>{
+      const tr=document.createElement("tr");
+      [t.action,money(t.price),t.quantity,
+       t.pnl==null?"--":money(t.pnl)].forEach(v=>{
+        const td=document.createElement("td");
+        td.textContent=v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    if(!data.trades||data.trades.length===0){
+      const tr=document.createElement("tr");
+      const td=document.createElement("td");
+      td.colSpan=4;td.textContent="No trades yet";
+      td.className="muted";tr.appendChild(td);tbody.appendChild(tr);
+    }
   }catch(error){
-    document.getElementById("error").textContent="Connection error: "+error.message;
+    put("connection","● CONNECTION ERROR");
+    document.getElementById("connection").style.color="#ff647c";
+    put("btc-status",error.message);
   }
 }
-refresh();
-setInterval(refresh,5000);
-</script>
 
-<section id="deriv-panel" style="background:#111827;color:#fff;padding:18px;margin:20px;border:1px solid #374151;border-radius:12px;">
-  <h2>NIGHTSHIFT — DERIV MARKETS</h2>
-  <p id="deriv-status">Connecting to Deriv...</p>
-  <p>Available instruments: <strong id="deriv-count">--</strong></p>
-<p>Volatility 100 (1s) live price: <strong id="deriv-price">Waiting...</strong></p>
-  <pre id="deriv-data" style="white-space:pre-wrap;overflow-wrap:anywhere;color:#9ca3af;">Loading market data...</pre>
-  <button onclick="loadDerivMarkets()" style="padding:10px 16px;border-radius:8px;cursor:pointer;">Refresh Markets</button>
-</section>
-
-<script>
-async function loadDerivMarkets() {
-  const status = document.getElementById("deriv-status");
-  const count = document.getElementById("deriv-count");
-  const output = document.getElementById("deriv-data");
-
-  status.textContent = "Connecting...";
-
-  try {
-    const response = await fetch("/api/deriv/markets");
-
-    if (!response.ok) {
-      throw new Error("HTTP " + response.status);
-    }
-
-    const data = await response.json();
-
-    status.textContent = data.ok
-      ? "Deriv feed connected"
-      : "Feed reported an error";
-
-    count.textContent = data.count ?? "--";
-
-    output.textContent = JSON.stringify(
-      data.markets ?? data,
-      null,
-      2
+async function updateDeriv(){
+  try{
+    const response=await fetch(
+      "/api/deriv/tick?symbol=1HZ100V",{cache:"no-store"}
     );
-
-  } catch (error) {
-    status.textContent = "Connection failed: " + error.message;
-    count.textContent = "--";
-    output.textContent = "Unable to load market data.";
+    const data=await response.json();
+    if(!data.ok)throw new Error(data.error||"Unavailable");
+    put("deriv-price",fmt(data.price));
+    put("deriv-status","● Deriv feed connected");
+    document.getElementById("deriv-status").className="small green";
+  }catch(error){
+    put("deriv-price","Unavailable");
+    put("deriv-status","Deriv: "+error.message);
+    document.getElementById("deriv-status").className="small red";
   }
 }
 
-loadDerivMarkets();
-async function updateDerivPrice() {
-  const price = document.getElementById("deriv-price");
-
-  try {
-    const response = await fetch("/api/deriv/tick?symbol=1HZ100V");
-    const data = await response.json();
-
-    if (!data.ok) {
-      throw new Error(data.error || "Price unavailable");
-    }
-
-    price.textContent = data.price;
-  } catch (error) {
-    price.textContent = "Unavailable";
-    console.error(error);
-  }
-}
-
-updateDerivPrice();
-setInterval(updateDerivPrice, 20000);
+refresh();
+updateDeriv();
+setInterval(refresh,5000);
+setInterval(updateDeriv,20000);
+window.addEventListener("resize",drawChart);
 </script>
-
 </body>
 </html>
 """
+
 
 
 @app.get("/", response_class=HTMLResponse)
