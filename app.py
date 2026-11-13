@@ -439,6 +439,15 @@ def build_status(market=None, market_error=None):
             "realized_pnl": round(realized, 2),
             "unrealized_pnl": round(unrealized, 2),
             "total_pnl": round(equity - STARTING_BALANCE, 2),
+            "daily_loss_pct": round(
+            (equity / state["day_start_equity"] - 1) * 100, 2
+            ),
+            "drawdown_pct": round(
+            (equity / state["peak_equity"] - 1) * 100, 2
+            ),
+            "risk_halted": state["risk_halted"],
+            "daily_loss_limit_pct": DAILY_LOSS_LIMIT * 100,
+            "max_drawdown_pct": MAX_DRAWDOWN * 100,
             "position": {
                 "quantity": round(quantity, 8),
                 "entry_price": round(position["entry_price"], 2),
