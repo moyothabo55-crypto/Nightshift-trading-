@@ -75,40 +75,46 @@ def get_market_data():
     # Use completed candles only for the EMA signal.
     candles = raw_candles[:-1]
 
-    if len(candles) < 30:
-        raise RuntimeError("Not enough completed candles yet")
+    
+if len(candles) < 200:
+    raise RuntimeError("Waiting for at least 200 completed candles")
 
-    closes = [float(candle[4]) for candle in candles]
-    candle_time = int(candles[-1][0])
+closes = [float(candle[4]) for candle in candles]
+candle_time = int(candles[-1][0])
 
-    ema9 = calculate_ema(closes[-80:], 9)
-    ema21 = calculate_ema(closes[-80:], 21)
+ema9 = calculate_ema(closes[-80:], 9)
+ema21 = calculate_ema(closes[-80:], 21)
 
-    previous_ema9 = calculate_ema(closes[-81:-1], 9)
-    previous_ema21 = calculate_ema(closes[-81:-1], 21)
+previous_ema9 = calculate_ema(closes[-81:-1], 9)
+previous_ema21 = calculate_ema(closes[-81:-1], 21)
 
-    if ema9 > ema21:
-        signal = "BUY"
-    elif ema9 < ema21:
-        signal = "SELL"
-    else:
-        signal = "HOLD"
+adaptive = adaptive_strategy({
+    "price": price,
+    "ema9": ema9,
+    "ema21": ema21,
+    "closes": closes,
+    "raw_candles": candles,
+})
 
-    return {
-        "symbol": "BTC/USDT",
-        "price": price,
-        "ema9": ema9,
-        "ema21": ema21,
-        "previous_ema9": previous_ema9,
-        "previous_ema21": previous_ema21,
-        "signal": signal,
-        "candle_time": candle_time,
-        "candles": len(candles),
-        "source": "Kraken public market data",
-    }
+return {
+    "symbol": "BTC/USDT",
+    "price": price,
+    "ema9": ema9,
+    "ema21": ema21,
+    "previous_ema9": previous_ema9,
+    "previous_ema21": previous_ema21,
+    "signal": adaptive["signal"],
+    "regime": adaptive["regime"],
+    "confidence": adaptive["confidence"],
+    "rsi": adaptive["rsi"],
+    "adx": adaptive["adx"],
+    "atr": adaptive["atr"],
+    "reason": adaptive["reason"],
+    "candle_time": candle_time,
+    "candles": len(candles),
+    "source": "Kraken public market data",
+}
 
-
-def calculate_ema(values, period):
     if len(values) < period:
         raise ValueError("Not enough prices to calculate EMA")
 
