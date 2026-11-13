@@ -22,6 +22,10 @@ TRADE_FRACTION = 0.10
 FEE_RATE = 0.001       # Simulated 0.1% fee per side
 STOP_LOSS = 0.02       # 2%
 TAKE_PROFIT = 0.03     # 3%
+RISK_PER_TRADE = 0.005       # Risk 0.5% of equity per trade
+MAX_POSITION_FRACTION = 0.25 # Maximum 25% of equity in one position
+DAILY_LOSS_LIMIT = 0.02      # Stop new entries after 2% daily loss
+MAX_DRAWDOWN = 0.08          # Stop new entries after 8% drawdown
 
 state_lock = threading.Lock()
 
