@@ -371,7 +371,7 @@ def process_paper_strategy(market):
                     pnl
                 )
 
-        elif market["signal"] == "BUY":
+        elif market["signal"] == "BUY" and not state["risk_halted"]:
             budget = state["cash"] * TRADE_FRACTION
 
             if budget > 10:
