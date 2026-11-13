@@ -557,8 +557,34 @@ function pnl(id,value){
 }
 
 let prices=[];
+let livePriceConnected=false;
+let liveSocket=null;
 
-function drawChart(){
+function connectLivePrice(){
+  liveSocket=new WebSocket("wss://ws.kraken.com/");
+  liveSocket.onopen=()=>{
+    liveSocket.send(JSON.stringify({
+      event:"subscribe",
+      pair:["XBT/USDT"],
+      subscription:{name:"ticker"}
+    }));
+  };
+  liveSocket.onmessage=(event)=>{
+    const message=JSON.parse(event.data);
+    if(!Array.isArray(message)||message[2]!=="ticker")return;
+    const price=Number(message[1]?.c?.[0]);
+    if(!Number.isFinite(price))return;
+    livePriceConnected=true;
+    put("connection","● LIVE PRICE STREAM");
+    document.getElementById("connection").style.color="#35e59a";
+    if(!livePriceConnected){
+  put("btc-status","● Kraken REST fallback");
+  put("price",money(data.price));
+  put("chart-price",money(data.price));
+  prices.push(Number(data.price));
+  if(prices.length>120)prices.shift();
+  drawChart();
+}
   const canvas=document.getElementById("price-chart");
   const rect=canvas.getBoundingClientRect();
   const ratio=window.devicePixelRatio||1;
@@ -683,6 +709,7 @@ async function updateDeriv(){
   }
 }
 
+connectLivePrice();
 refresh();
 updateDeriv();
 setInterval(refresh,5000);
