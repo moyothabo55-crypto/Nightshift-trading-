@@ -571,7 +571,7 @@ function connectLivePrice(){
   };
   liveSocket.onmessage=(event)=>{
     const message=JSON.parse(event.data);
-    if(!Array.isArray(message)||message[2]!=="ticker")return;
+    if(!Array.isArray(message)||!message.includes("ticker"))return;
     const price=Number(message[1]?.c?.[0]);
     if(!Number.isFinite(price))return;
     livePriceConnected=true;
