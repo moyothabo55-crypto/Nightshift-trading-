@@ -115,25 +115,6 @@ def get_market_data():
     }
 
 
-    return {
-    "symbol": "BTC/USDT",
-    "price": price,
-    "ema9": ema9,
-    "ema21": ema21,
-    "previous_ema9": previous_ema9,
-    "previous_ema21": previous_ema21,
-    "signal": adaptive["signal"],
-    "regime": adaptive["regime"],
-    "confidence": adaptive["confidence"],
-    "rsi": adaptive["rsi"],
-    "adx": adaptive["adx"],
-    "atr": adaptive["atr"],
-    "reason": adaptive["reason"],
-    "candle_time": candle_time,
-    "candles": len(candles),
-    "source": "Kraken public market data",
-}
-
     if len(values) < period:
         raise ValueError("Not enough prices to calculate EMA")
 
