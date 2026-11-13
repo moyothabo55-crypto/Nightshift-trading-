@@ -372,7 +372,17 @@ def process_paper_strategy(market):
                 )
 
         elif market["signal"] == "BUY" and not state["risk_halted"]:
-            budget = state["cash"] * TRADE_FRACTION
+            risk_budget = equity * RISK_PER_TRADE
+risk_based_notional = risk_budget / STOP_LOSS
+
+max_notional = equity * MAX_POSITION_FRACTION
+available_notional = state["cash"] / (1 + FEE_RATE)
+
+budget = min(
+    risk_based_notional,
+    max_notional,
+    available_notional
+)
 
             if budget > 10:
                 quantity = budget / (price * (1 + FEE_RATE))
