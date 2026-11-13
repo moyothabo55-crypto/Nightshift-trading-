@@ -308,7 +308,10 @@ th{color:#91a0b9;font-weight:normal}
     <h1>NIGHTSHIFT</h1>
     <div class="muted">BTC/USDT MARKET SYSTEM</div>
   </div>
+  <div>
   <div class="pill">PAPER MODE · NO REAL ORDERS</div>
+  <div class="muted" id="connection" style="margin-top:8px;">Connecting to market...</div>
+</div>
 </header>
 
 <div class="grid">
@@ -371,7 +374,11 @@ async function refresh(){
   try{
     const response=await fetch("/api/status",{cache:"no-store"});
     const data=await response.json();
-
+const connection = document.getElementById("connection");
+connection.textContent = data.market_error
+  ? "Market feed unavailable"
+  : "● LIVE · Market connected";
+connection.style.color = data.market_error ? "#ff7c87" : "#66dfa5";
     if(data.price != null) setValue("price",money(data.price));
     document.getElementById("signal").textContent=data.signal || "WAITING";
     document.getElementById("signal").className="value "+
@@ -407,7 +414,7 @@ async function refresh(){
   }
 }
 refresh();
-setInterval(refresh,30000);
+setInterval(refresh,5000);
 </script>
 
 <section id="deriv-panel" style="background:#111827;color:#fff;padding:18px;margin:20px;border:1px solid #374151;border-radius:12px;">
