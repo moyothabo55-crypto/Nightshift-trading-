@@ -958,6 +958,15 @@ async function refresh(){
     put("adx",fmt(data.adx));
     put("atr",fmt(data.atr));
     put("signal-reason",data.signal_reason||"Waiting for analysis");
+    const halted = data.risk_halted === true;
+put("risk-status", halted ? "HALTED" : "ACTIVE");
+put("daily-loss", Math.max(0, -Number(data.daily_loss_pct || 0)).toFixed(2) + "%");
+put("drawdown", Math.max(0, -Number(data.drawdown_pct || 0)).toFixed(2) + "%");
+
+const riskStatus = document.getElementById("risk-status");
+if (riskStatus) {
+  riskStatus.style.color = halted ? "#ff647c" : "#35e59a";
+}
     put("cash",money(data.cash_balance));
     put("equity",money(data.equity));
     pnl("total",data.total_pnl);
