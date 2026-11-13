@@ -32,6 +32,10 @@ state_lock = threading.Lock()
 state = {
     "cash": STARTING_BALANCE,
     "realized_pnl": 0.0,
+    "day_start_equity": STARTING_BALANCE,
+    "day_key": datetime.now(timezone.utc).date().isoformat(),
+    "peak_equity": STARTING_BALANCE,
+    "risk_halted": False,
     "position": None,
     "last_action": "Waiting for market data",
     "last_update": None,
